@@ -39,7 +39,6 @@ func postHandler(w http.ResponseWriter, r *http.Request) {
 		voltage, _ := strconv.ParseFloat(r.FormValue("voltage"), 64)
 		current, _ := strconv.ParseFloat(r.FormValue("current"), 64)
 		readings = append(readings, reading{Timestamp: 1000 * time.Now().Unix(), Voltage: voltage, Current: current})
-		fmt.Println(readings)
 	} else if r.Method == "GET" {
 		json.NewEncoder(w).Encode(readings)
 	} else {
