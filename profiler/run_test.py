@@ -4,6 +4,8 @@ import requests
 import asyncio
 import asyncpg
 from dotenv import load_dotenv
+from numpy.random import rand
+import pandas as pd
 
 
 load_dotenv()
@@ -59,14 +61,29 @@ def test_db_insert_small(n_requests=1000):
     return 1000 * (t1 - t0) / n_requests
 
 
+def test_db_insert_large(n_requests=100, insert_size=10000):
+    rand_values = pd.DataFrame(
+        data={"voltage": 3.25 + (0.5 * rand(insert_size)),
+              "current": 1.09 + (0.02 * rand(insert_size))}
+    ).to_dict(orient="records")
+
+    t0 = time.time()
+    for i in range(n_requests):
+        requests.post("http://127.0.0.1:8000/data/db-large", json=rand_values)
+    t1 = time.time()
+    return 1000 * (t1 - t0) / n_requests
+
+
 async def run():
+    ms_per_request = {}
+    ms_per_request["local_memory"] = test_local_memory()
     db = PostgresHandler()
     await db.connect()
     await db.create_signals_tables()
     await db.reset_signals_table()
-    ms_per_request = {}
-    ms_per_request["local_memory"] = test_local_memory()
     ms_per_request["small_db_insert"] = test_db_insert_small()
+    await db.reset_signals_table()
+    ms_per_request["large_db_insert"] = test_db_insert_large()
     print(ms_per_request)
 
 
