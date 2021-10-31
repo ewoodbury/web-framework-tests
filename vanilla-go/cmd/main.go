@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/jackc/pgx/v4"
@@ -23,13 +24,13 @@ type reading struct {
 
 type readingData []reading
 
-var readings = readingData{
-	{
-		Timestamp: 1635130015000,
-		Voltage:   2.910,
-		Current:   1.12,
-	},
+var readings = readingData{}
+
+type rawData []struct {
+	Voltage   float64 `json:"voltage"`
+	Current   float64 `json:"current"`
 }
+
 
 var Conn *pgx.Conn
 
@@ -66,7 +67,7 @@ func postHandlerLocal(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func postHandlerDb(w http.ResponseWriter, r *http.Request) {
+func postHandlerDbSmall(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "POST" {
 		if err := r.ParseForm(); err != nil {
 			fmt.Fprintf(w, "ParseForm() err: %v", err)
@@ -86,6 +87,39 @@ func postHandlerDb(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func postHandlerDbLarge(w http.ResponseWriter, r *http.Request) {
+	if r.Method == "POST" {
+		// Unpack request JSON data using io:
+		b, err := io.ReadAll(r.Body)
+		if err != nil {
+			fmt.Printf("io ReadAll err: %v", err)
+		}
+		// Parse unpacked data into new struct
+		var data rawData
+		err = json.Unmarshal(b, &data)
+		if err != nil {
+			fmt.Printf("Json Unmarshal err: %v", err)
+			return
+		}
+		
+		var query strings.Builder
+		query.WriteString(`INSERT INTO cell_signals (test_id, measured_at, cell_voltage, cell_current) VALUES`)
+		var vals []interface{}
+		// Loop through data, and append to query string using incrementing Postgres args (prevent SQL injection)
+		for i, s := range data {
+			query.WriteString(fmt.Sprintf(`(1, current_timestamp, $%d, $%d)`, (i*2+1), (i*2+2)))
+			vals = append(vals, s.Voltage, s.Current)
+			if i < len(data) - 1 {query.WriteString(", ")} else {query.WriteString(";")}
+		}
+		_, err = Conn.Exec(context.Background(), query.String(), vals...)
+		if err != nil {
+			fmt.Printf("Insert execution err: %v", err)
+		}
+	} else {
+		fmt.Fprintf(w, "Only POST method allowed.")
+	}
+}
+
 func main() {
 	err := connectToDb()
 	if err != nil {
@@ -94,7 +128,8 @@ func main() {
 	}
 	http.HandleFunc("/", helloHandler)
 	http.HandleFunc("/data/local", postHandlerLocal)
-	http.HandleFunc("/data/db-small", postHandlerDb)
+	http.HandleFunc("/data/db-small", postHandlerDbSmall)
+	http.HandleFunc("/data/db-large", postHandlerDbLarge)
 	log.Println("Running server...")
 	log.Fatal(http.ListenAndServe("127.0.0.1:8000", nil))
 }
