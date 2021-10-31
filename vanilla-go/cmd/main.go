@@ -31,8 +31,6 @@ var readings = readingData{
 	},
 }
 
-var id int = 1
-
 var Conn *pgx.Conn
 
 func connectToDb() error {
@@ -49,7 +47,6 @@ func connectToDb() error {
 }
 
 func helloHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Println(Conn)
 	io.WriteString(w, "Welcome to this Go benchmark! Try navigating to /data...\n")
 }
 
@@ -78,15 +75,12 @@ func postHandlerDb(w http.ResponseWriter, r *http.Request) {
 		voltage := r.FormValue("voltage")
 		current := r.FormValue("current")
 		// Execute insert statement against Postgres db:
-		insertStatement := `INSERT INTO cell_signals (id, test_id, measured_at, cell_voltage, cell_current)
-		VALUES ($1, 1, current_timestamp, $2, $3)`
-		fmt.Println(insertStatement, voltage, current)
-		tag, err := Conn.Exec(context.Background(), insertStatement, id, voltage, current)
+		insertStatement := `INSERT INTO cell_signals (test_id, measured_at, cell_voltage, cell_current)
+		VALUES (1, current_timestamp, $1, $2)`
+		_, err := Conn.Exec(context.Background(), insertStatement, voltage, current)
 		if err != nil {
 			fmt.Println(err)
 		}
-		fmt.Println(tag)
-		id++
 	} else {
 		fmt.Fprintf(w, "Only POST method allowed.")
 	}
@@ -100,7 +94,7 @@ func main() {
 	}
 	http.HandleFunc("/", helloHandler)
 	http.HandleFunc("/data/local", postHandlerLocal)
-	http.HandleFunc("/data/db", postHandlerDb)
+	http.HandleFunc("/data/db-small", postHandlerDb)
 	log.Println("Running server...")
 	log.Fatal(http.ListenAndServe("127.0.0.1:8000", nil))
 }
