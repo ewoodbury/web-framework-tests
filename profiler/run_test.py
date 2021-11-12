@@ -52,16 +52,7 @@ def test_local_memory(n_requests=1000):
     return 1000 * (t1 - t0) / n_requests
 
 
-def test_db_insert_small(n_requests=1000):
-    t0 = time.time()
-    for i in range(n_requests):
-        requests.post("http://127.0.0.1:8000/data/db-small",
-                      data={"voltage": 3.4 + i*.001, "current": 1.1 * i*.001})
-    t1 = time.time()
-    return 1000 * (t1 - t0) / n_requests
-
-
-def test_db_insert_large(n_requests=100, insert_size=10000):
+def test_db_insert(n_requests, insert_size):
     rand_values = pd.DataFrame(
         data={"voltage": 3.25 + (0.5 * rand(insert_size)),
               "current": 1.09 + (0.02 * rand(insert_size))}
@@ -81,9 +72,9 @@ async def run():
     await db.connect()
     await db.create_signals_tables()
     await db.reset_signals_table()
-    ms_per_request["small_db_insert"] = test_db_insert_small()
+    ms_per_request["small_db_insert"] = test_db_insert(n_requests=1000, insert_size=1)
     await db.reset_signals_table()
-    ms_per_request["large_db_insert"] = test_db_insert_large()
+    ms_per_request["large_db_insert"] = test_db_insert(n_requests=300, insert_size=10000)
     print(ms_per_request)
 
 

@@ -67,27 +67,7 @@ func postHandlerLocal(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func postHandlerDbSmall(w http.ResponseWriter, r *http.Request) {
-	if r.Method == "POST" {
-		if err := r.ParseForm(); err != nil {
-			fmt.Fprintf(w, "ParseForm() err: %v", err)
-			return
-		}
-		voltage := r.FormValue("voltage")
-		current := r.FormValue("current")
-		// Execute insert statement against Postgres db:
-		insertStatement := `INSERT INTO cell_signals (test_id, measured_at, cell_voltage, cell_current)
-		VALUES (1, current_timestamp, $1, $2)`
-		_, err := Conn.Exec(context.Background(), insertStatement, voltage, current)
-		if err != nil {
-			fmt.Println(err)
-		}
-	} else {
-		fmt.Fprintf(w, "Only POST method allowed.")
-	}
-}
-
-func postHandlerDbLarge(w http.ResponseWriter, r *http.Request) {
+func postHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "POST" {
 		// Unpack request JSON data using io:
 		b, err := io.ReadAll(r.Body)
@@ -128,8 +108,7 @@ func main() {
 	}
 	http.HandleFunc("/", helloHandler)
 	http.HandleFunc("/data/local", postHandlerLocal)
-	http.HandleFunc("/data/db-small", postHandlerDbSmall)
-	http.HandleFunc("/data/db-large", postHandlerDbLarge)
+	http.HandleFunc("/data/db", postHandler)
 	log.Println("Running server...")
 	log.Fatal(http.ListenAndServe("127.0.0.1:8000", nil))
 }
