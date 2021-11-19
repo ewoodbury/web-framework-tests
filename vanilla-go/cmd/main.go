@@ -8,7 +8,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"strconv"
 	"strings"
 	"time"
 
@@ -53,13 +52,19 @@ func helloHandler(w http.ResponseWriter, r *http.Request) {
 
 func postHandlerLocal(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "POST" {
-		if err := r.ParseForm(); err != nil {
-			fmt.Fprintf(w, "ParseForm() err: %v", err)
+		// Unpack request JSON data using io:
+		body, err := io.ReadAll(r.Body)
+		if err != nil {
+			fmt.Printf("io ReadAll err: %v", err)
+		}
+		// Parse unpacked data into new struct
+		var data rawData
+		err = json.Unmarshal(body, &data)
+		if err != nil {
+			fmt.Printf("Json Unmarshal err: %v", err)
 			return
 		}
-		voltage, _ := strconv.ParseFloat(r.FormValue("voltage"), 64)
-		current, _ := strconv.ParseFloat(r.FormValue("current"), 64)
-		readings = append(readings, reading{Timestamp: 1000 * time.Now().Unix(), Voltage: voltage, Current: current})
+		readings = append(readings, reading{Timestamp: 1000 * time.Now().Unix(), Voltage: data[0].Voltage, Current: data[0].Current})
 	} else if r.Method == "GET" {
 		json.NewEncoder(w).Encode(readings)
 	} else {
