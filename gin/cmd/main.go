@@ -46,5 +46,6 @@ func postHandlerLocal(c *gin.Context) {
         return
     }
 	fmt.Println(data[0])
-	fmt.Println(readings)
+	// fmt.Println(readings)
+	readings = append(readings, reading{Timestamp: 1000 * time.Now().Unix(), Voltage: data[0].Voltage, Current: data[0].Current})
 }
