@@ -96,9 +96,9 @@ func postHandler(w http.ResponseWriter, r *http.Request) {
 			vals = append(vals, s.Voltage, s.Current)
 			if i < len(data) - 1 {query.WriteString(", ")} else {query.WriteString(";")}
 		}
-		_, err = Conn.Exec(context.Background(), query.String(), vals...)
-		if err != nil {
-			fmt.Printf("Insert execution err: %v", err)
+		_, execErr := Conn.Exec(context.Background(), query.String(), vals...)
+		if execErr != nil {
+			fmt.Printf("Insert execution err: %v", execErr)
 		}
 	} else {
 		fmt.Fprintf(w, "Only POST method allowed.")
