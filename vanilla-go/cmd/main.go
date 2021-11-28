@@ -72,7 +72,7 @@ func postHandlerLocal(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func postHandler(w http.ResponseWriter, r *http.Request) {
+func postHandlerDb(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "POST" {
 		// Unpack request JSON data using io:
 		b, err := io.ReadAll(r.Body)
@@ -113,7 +113,7 @@ func main() {
 	}
 	http.HandleFunc("/", helloHandler)
 	http.HandleFunc("/data/local", postHandlerLocal)
-	http.HandleFunc("/data/db", postHandler)
+	http.HandleFunc("/data/db", postHandlerDb)
 	log.Println("Running server...")
 	log.Fatal(http.ListenAndServe("127.0.0.1:8000", nil))
 }
