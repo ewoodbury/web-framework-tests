@@ -1,4 +1,4 @@
-module github.com/ewoodbury/web-framework-tests/vanilla-go
+module github.com/ewoodbury/web-framework-tests/gin
 
 go 1.17
 
