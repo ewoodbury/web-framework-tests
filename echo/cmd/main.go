@@ -29,6 +29,7 @@ func main() {
 	connectToDb()
 	e := echo.New()
 	e.POST("/data/local", postHandlerLocal)
+	e.POST("/data/db", postHandlerDb)
 	e.Logger.Fatal(e.Start("127.0.0.1:8000"))
 }
 
@@ -55,14 +56,14 @@ func postHandlerLocal(c echo.Context) error {
         return err
     }
 	readings = append(readings, reading{Timestamp: 1000 * time.Now().Unix(), Voltage: (*data)[0].Voltage, Current: (*data)[0].Current})
-	return c.JSON(http.StatusOK, data)
+	return c.String(http.StatusOK, "success")
 }
 
-func postHandlerDb(c echo.Context) {
+func postHandlerDb(c echo.Context) error {
     data := new(rawData)
 	if err := c.Bind(data); err != nil {
 		fmt.Println(err)
-        return
+        return err
     }
 	
 	var query strings.Builder
@@ -78,4 +79,5 @@ func postHandlerDb(c echo.Context) {
 	if execErr != nil {
 		fmt.Printf("Insert execution err: %v", execErr)
 	}
+	return c.String(http.StatusOK, "success")
 }
