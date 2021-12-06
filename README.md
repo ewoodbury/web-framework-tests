@@ -1,6 +1,6 @@
 # web-framework-tests
 
-A small project testing several Go and Python frameworks
+Testing the performance of several Go and Python web frameworks
 
 ## About
 
@@ -10,16 +10,35 @@ Currently supported frameworks:
 
 - Vanilla Go (built-in http package)
 - Gin (Go)
+- Echo (Go)
 
 To-do:
 
-- Echo (Go)
 - FastAPI (Python)
 - Flask (Python)
 
 Performance is tested for both local data handling and for saving data to a Postgres database.
 
-This project also includes a profiler client (in Python) that tests each framework and compares the results. The project uses simulated battery cell test data (what I'm most familar with :D).
+This project also includes a profiler client (in Python) that tests each framework and compares the results. The project uses simulated battery cell test data (what I'm most familar with :smile:).
+
+## Results
+
+![Results Plot](profiler/results.png)
+
+| Framework  | Local Memory | Small Insert | Large Insert |
+|------------|--------------|--------------|--------------|
+| Vanilla Go | 2.25         | 3.16         | 83.77        |
+| Gin        | 3.31         | 3.97         | 114.3        |
+| Echo       | 2.25         | 3.16         | 83.77        |
+
+All response times shown in milliseconds.
+
+The test measured response time for three different tests:
+- Local Memory: A single row of data is saved to the web server's local memory
+- Small insert: A single row of data is inserted into the database
+- Large insert: 10,000 rows of data are inserted into the database
+
+All measured values are the average response time across three runs, and error ranges show the 95% confidence interval. Raw data and analysis is in the `/profiler` directory.
 
 ## Setup
 - Install Go (≥ 1.17) and Python (≥ 3.8)

@@ -1,0 +1,28 @@
+framework,run,endpoint,response_time_ms
+vanilla_go,1,Local Memory,2.43
+vanilla_go,1,Small insert - 1 row,3.78
+vanilla_go,1,"Large insert - 10,000 rows",109.02
+vanilla_go,2,Local Memory,2.18
+vanilla_go,2,Small insert - 1 row,2.66
+vanilla_go,2,"Large insert - 10,000 rows",77.48
+vanilla_go,3,Local Memory,2.18
+vanilla_go,3,Small insert - 1 row,2.73
+vanilla_go,3,"Large insert - 10,000 rows",111.69
+gin,1,Local Memory,3.25
+gin,1,Small insert - 1 row,3.83
+gin,1,"Large insert - 10,000 rows",88.93
+gin,2,Local Memory,3.26
+gin,2,Small insert - 1 row,4.34
+gin,2,"Large insert - 10,000 rows",114.03
+gin,3,Local Memory,3.41
+gin,3,Small insert - 1 row,3.73
+gin,3,"Large insert - 10,000 rows",140.01
+echo,1,Local Memory,2.21
+echo,1,Small insert - 1 row,2.65
+echo,1,"Large insert - 10,000 rows",73.79
+echo,2,Local Memory,2.35
+echo,2,Small insert - 1 row,4.01
+echo,2,"Large insert - 10,000 rows",99.3
+echo,3,Local Memory,2.2
+echo,3,Small insert - 1 row,2.82
+echo,3,"Large insert - 10,000 rows",78.21
